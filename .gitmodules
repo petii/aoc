@@ -1,0 +1,3 @@
+[submodule "aoc2020"]
+	path = aoc2020
+	url = git@github.com:petii/aoc2020.git
