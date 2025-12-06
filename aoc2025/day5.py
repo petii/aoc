@@ -1,4 +1,4 @@
-# day5.py
+#day5.py
 from pprint import pprint
 
 example = '''3-5

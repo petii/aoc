@@ -1,4 +1,4 @@
-# day3.py
+#day3.py
 
 from pprint import pprint
 from itertools import combinations
@@ -21,9 +21,9 @@ def max_joltage(bank, batteries=2, quiet = True):
 		second_digit = None
 		for b in bank:
 			j = int(b)
-			# print(f'\t\t[{j}] {first_digit}{second_digit}',end=' ')
+#print(f '\t\t[{j}] {first_digit}{second_digit}', end = ' ')
 			if first_digit == None or j > first_digit:
-				# print('branch 1')
+#print('branch 1')
 				if first_digit != None:
 					candidates.append(int(f'{first_digit}{j}'))
 				first_digit = j
@@ -31,13 +31,13 @@ def max_joltage(bank, batteries=2, quiet = True):
 				continue
 
 			if first_digit != None and (second_digit == None or j > second_digit):
-				# print('branch 2',end=' ')
+#print('branch 2', end = ' ')
 				second_digit = j
 
 			if first_digit != None and second_digit != None:
-				# print('branch 3',end=' ')
+#print('branch 3', end = ' ')
 				candidates.append(int(f'{first_digit}{second_digit}'))
-			# print('')
+#print('')
 	else:
 		def get_candidate(bank, top_x = None):
 			bank_jolts = list(map(int, list(bank)))
@@ -48,7 +48,7 @@ def max_joltage(bank, batteries=2, quiet = True):
 					if v == j:
 						mask[i] = v
 				digit_masks[j] = mask
-				# print(j,'->',mask)
+#print(j, '->', mask)
 
 			digits_in_dict = digit_masks.keys()
 			digits_desc = sorted(digits_in_dict, reverse=True)
@@ -66,7 +66,7 @@ def max_joltage(bank, batteries=2, quiet = True):
 				if result_lenght >= batteries:
 					break;
 
-				for i,v in enumerate(reversed(mask)):
+                                for i,v in enumerate(reversed(mask)):
 					rev_i = len(mask) - i - 1
 					result_lenght = sum(1 if v >= 0 else 0 for v in merged_mask)
 					if i >= start_pos and merged_mask[rev_i] < v and result_lenght < batteries:
@@ -77,7 +77,8 @@ def max_joltage(bank, batteries=2, quiet = True):
 						continue
 
 					leftover_candidates = sum(1 if j < d else 0 for j in bank_jolts[i:])
-					# print(d, mask, leftover_candidates, result_lenght)
+#print(d, mask, leftover_candidates,           \
+                                       result_lenght)
 					if leftover_candidates > batteries - result_lenght:
 						start_pos = i
 			
@@ -86,7 +87,7 @@ def max_joltage(bank, batteries=2, quiet = True):
 				print(f'\t[{bank}]',
 					digits_desc[:top_x] if top_x is not None else digits_desc,
 					len(res), res)
-			# pprint(digit_masks)
+#pprint(digit_masks)
 
 			if len(res) < batteries:
 				raise Exception('whoops, not enough digits')
@@ -94,65 +95,80 @@ def max_joltage(bank, batteries=2, quiet = True):
 
 		mask_candidate = get_candidate(bank)
 
-		# if len(mask_candidate) < batteries * 2:
-			# 2x C x does not scale amazingly, but should be fast enough for now
+#if len(mask_candidate) < batteries * 2:
+# 2x C x does not scale amazingly,             \
+                                    but should be fast enough for now
 		candidates = map(lambda c: int(''.join(list(c))), combinations(mask_candidate, batteries))
-		# else:
-		# 	# too many repeating numbers - filter it down
-		# 	top = 1
-		# 	jolts = list(map(int, list(bank)))
-		# 	max_jolt = max(jolts)
-		# 	max_idx = jolts.index(max_jolt)
-		# 	new_bank = bank[max_idx:]
-		# 	# if len(new_bank) <
-		# 	new_candidate = []
-		# 	if not quiet:
-		# 		print(f'\t[{bank}] top={top} {max_jolt} [{new_bank}]') 
-		# 	try:
-		# 		new_candidate = get_candidate(new_bank,top)
-		# 	except:
-		# 		pass
-		
-		# 	while len(new_candidate if new_candidate is not None else []) < batteries:
-		# 		top += 1
-		# 		if not quiet:
-		# 			print(f'loop\t[{bank}] top={top} {max_jolt} [{new_bank}]') 
-		# 		try:
-		# 			new_candidate = get_candidate(new_bank,top)
-		# 		except:
-		# 			print('threw for top =', top)
-		# 			try:
-		# 				new_candidate = get_candidate(bank,top)
-		# 			except:
-		# 				pass
-		# 				new_candidate = None
-		# 			# we're increasing the numbers anyway
-		# 		finally:
-		# 			if not quiet:
-		# 				print(f'loop\t[{bank}]', len(new_candidate if new_candidate is not None else []), new_candidate)
-						
-		# 		if top > 9:
-		# 			break
+#else:
+# #too many repeating numbers - filter it down
+#top = 1
+#jolts = list(map(int, list(bank)))
+#max_jolt = max(jolts)
+#max_idx = jolts.index(max_jolt)
+#new_bank = bank[max_idx : ]
+# #if len(new_bank)<
+#new_candidate = []
+#if not quiet:
+#print(                                        \
+                                    f '\t[{bank}] top={top} {max_jolt} [{new_bank}]')
+#try:
+#new_candidate = get_candidate(new_bank, top)
+#except:
+#pass
 
-		# 	if len(new_candidate) >= batteries * 2:
-		# 		# still too much - remove the smallest numbers on the biggest decimal place until good
-		# 		candidate_jolts = list(map(int, list(new_candidate)))
-		# 		min_jolt = min(candidate_jolts)
-		# 		newest_candidate_list = list(new_candidate)
-		# 		while len(newest_candidate_list) > batteries:
-		# 			newest_candidate_list.pop(newest_candidate_list.index(str(min_jolt)))
-		# 		new_candidate = ''.join(newest_candidate_list)
+#while len(new_candidate if new_candidate      \
+                                               is not None else[]) <           \
+                                    batteries:
+#top += 1
+#if not quiet:
+#print(                                        \
+                                    f 'loop\t[{bank}] top={top} {max_jolt} [{new_bank}]')
+#try:
+#new_candidate = get_candidate(new_bank, top)
+#except:
+#print('threw for top =', top)
+#try:
+#new_candidate = get_candidate(bank, top)
+#except:
+#pass
+#new_candidate = None
+# #we're increasing the numbers anyway
+#finally:
+#if not quiet:
+#print(f 'loop\t[{bank}]',                     \
+                                       len(new_candidate if new_candidate      \
+                                               is not None else[]),            \
+                                       new_candidate)
 
-		# 		if not quiet:
-		# 			print(f'fin = [{bank}]', new_candidate)
+#if top > 9:
+#break
 
+#if len(new_candidate) >= batteries * 2:
+# #still too much -                            \
+                                    remove the smallest numbers on the biggest decimal place until good
+#candidate_jolts =                             \
+                                    list(map(int, list(new_candidate)))
+#min_jolt = min(candidate_jolts)
+#newest_candidate_list = list(new_candidate)
+#while len(newest_candidate_list)> batteries:
+#newest_candidate_list.pop(                    \
+                                    newest_candidate_list.index(               \
+                                        str(min_jolt)))
+#new_candidate = ''.join(newest_candidate_list)
 
-		# 	candidates = map(lambda c: int(''.join(list(c))), combinations(new_candidate, batteries))
-		# 	mask_candidate = new_candidate
+#if not quiet:
+#print(f 'fin = [{bank}]', new_candidate)
+
+#candidates = map(                             \
+                                    lambda c : int(''.join(list(c))),          \
+                                    combinations(new_candidate, batteries))
+#mask_candidate = new_candidate
 
 		if not quiet:
 			print(f'res=\t[{bank}]', len(mask_candidate), mask_candidate)
-		# candidates.append(int(''.join([str(v) if v >= 0 else '' for v in merged_mask])))
+#candidates.append(int(''.join(                \
+                                    [str(v) if v >=                            \
+                                        0 else '' for v in merged_mask])))
 
 	
 	if not quiet:

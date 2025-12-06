@@ -1,4 +1,4 @@
-# day1.py
+#day1.py
 
 example= '''L68
 			L30
@@ -15,13 +15,13 @@ def rotator(starts, action, onTurnOver):
 	direction = action[0]
 	amount = int(action[1:])
 	newPos = starts
-	# print(action)
+#print(action)
 	for i in range(1, amount+1):
 		newPos = (newPos + (1 if direction == 'L' else -1)) % 100
 		if newPos == 0:
-			# print('click', i)
+#print('click', i)
 			onTurnOver()
-	# print( starts, ' -> ', newPos)
+#print(starts, ' -> ', newPos)
 	return newPos
 
 

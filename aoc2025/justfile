@@ -8,3 +8,6 @@ day1:
 day6:
     clang++ day6.cpp -Wall --std=c++23 -o ./bin/day6{{ext}}
     ./bin/day6{{ext}}
+
+fmt:
+    clang-format -i *.cpp *.py

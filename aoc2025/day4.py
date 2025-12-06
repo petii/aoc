@@ -1,4 +1,4 @@
-# day4.py
+#day4.py
 from pprint import pprint
 
 example = '''
@@ -17,7 +17,7 @@ example = '''
 
 class PrintDepartment:
 	def __init__(self, floor, pretty=False, debug=False):
-		# cleaned_floor = filter(lambda l: l.strip() != '', floor.split('\n'))
+#cleaned_floor = filter(lambda l : l.strip() != '', floor.split('\n'))
 		cleaned_floor = floor
 		self.map = [list(row) for row in cleaned_floor]
 		self.width = len(self.map[0])
@@ -108,4 +108,3 @@ with open('inputs/day4.txt') as f:
 	print(pd, pd.width, pd.heigth)
 	print('part 1 = ', part1(pd))
 	print('part 2 = ', part2(pd))
-
