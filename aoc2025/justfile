@@ -1,0 +1,5 @@
+# https://just.systems
+set windows-shell := ["C:\\Program Files\\Git\\bin\\sh.exe","-c"]
+
+day1:
+    uv run day1.py
