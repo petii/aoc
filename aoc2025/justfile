@@ -1,5 +1,10 @@
 # https://just.systems
 set windows-shell := ["C:\\Program Files\\Git\\bin\\sh.exe","-c"]
+ext := if os() == "windows" { ".exe" } else { "" }
 
 day1:
     uv run day1.py
+
+day6:
+    clang++ day6.cpp -Wall --std=c++23 -o ./bin/day6{{ext}}
+    ./bin/day6{{ext}}
