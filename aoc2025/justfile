@@ -6,6 +6,7 @@ day1:
     uv run day1.py
 
 day6:
+    clang-format -i day6.cpp
     clang++ day6.cpp -Wall --std=c++23 -o ./bin/day6{{ext}}
     ./bin/day6{{ext}}
 

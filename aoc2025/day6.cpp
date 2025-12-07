@@ -18,10 +18,16 @@ constexpr int stoi_impl(std::string_view str, int value = 0) {
 
 constexpr int stoi(std::string_view str) { return stoi_impl(str); }
 
+constexpr auto split_to_rows(std::string_view input) {
+  auto not_empty = [](auto row) { return std::size(row) > 0; };
+
+  return std::views::split(input, '\n') | std::views::filter(not_empty);
+}
+
 constexpr auto clean_input(std::string_view input) {
   auto not_empty = [](auto row) { return std::size(row) > 0; };
 
-  auto rows = std::views::split(input, '\n') | std::views::filter(not_empty);
+  auto rows = split_to_rows(input);
   return rows | std::views::transform([not_empty](auto row) {
            return row | std::views::split(' ') | std::views::filter(not_empty) |
                   std::views::transform(
@@ -75,11 +81,60 @@ constexpr auto apply_ops(auto split) {
   return applied_ops;
 }
 
-constexpr auto part1(const std::string_view &input) {
+constexpr auto part1(std::string_view input) {
   auto split = split_by_ops(input);
   auto applied_ops = apply_ops(split);
 
   return std::tuple{applied_ops, split};
+}
+
+struct InputColumn {
+  constexpr InputColumn() {}
+};
+
+struct CephalopodInt {
+  constexpr CephalopodInt(std::span<int> number_set) {}
+};
+
+constexpr auto part2(std::string_view input) {
+  auto ops = get_ops(clean_input(input));
+  auto rows = split_to_rows(input);
+
+  auto row_count = std::ranges::distance(rows);
+  auto col_count =
+      std::ranges::distance(rows | std::views::take(1) | std::views::join);
+
+  auto enumerated_rows =
+      std::views::iota(0, col_count + 1) |
+      std::views::transform([input, row_count](auto i) {
+        auto rows = split_to_rows(input) | std::views::take(row_count - 1);
+        auto col =
+            rows | std::views::transform([i](auto row) { return row[i]; });
+        return col;
+      });
+
+  auto is_space = [](char c) { return c == ' '; };
+
+  auto chunked_chars =
+      enumerated_rows | std::views::chunk_by([is_space](auto left, auto right) {
+        return !std::ranges::all_of(left, is_space) &&
+               !std::ranges::all_of(right, is_space);
+      });
+  auto columns =
+      chunked_chars | std::views::filter([is_space](auto col) {
+        return !std::ranges::all_of(col | std::views::join, is_space);
+      }) |
+      std::views::transform([](auto col) {
+        return col | std::views::transform([](auto num) {
+                 auto clean_num = num | std::views::filter([](auto c) {
+                                    return c != ' ' && c != '\n';
+                                  });
+                 return stoi(std::ranges::to<std::string>(clean_num));
+               });
+      });
+
+  auto zipped = std::views::zip(ops, columns);
+  return std::tuple{apply_ops(zipped), zipped};
 }
 
 constexpr auto example = R"TASK(
@@ -97,15 +152,25 @@ constexpr auto day6 = R"TASK(
 )TASK";
 
 int main() {
+  std::println("example:\n{}", example);
+
   {
-    std::println("example:\n{}", example);
     auto [solution, debug] = part1(example);
     std::println("part 1 = {}, debug = {}", solution, debug);
   }
   {
-    std::println("input");
+    auto [solution, debug] = part2(std::string{example});
+    std::println("part 2 = {}, debug = {}", solution, debug);
+  }
+  std::println("input");
+
+  {
     auto [solution, debug] = part1(day6);
     std::println("part 1 = {}", solution);
+  }
+  {
+    auto [solution, debug] = part2(std::string{day6});
+    std::println("part 2 = {}", solution);
   }
   return 0;
 }
