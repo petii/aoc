@@ -27,4 +27,6 @@ day6:
     ./bin/day6{{ext}}
 
 day7:
+    cargo fmt -- src/day7.rs
     cargo test --bin day7
+    cargo run day7 -- inputs/day7.txt
