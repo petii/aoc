@@ -127,7 +127,7 @@ fn main() {
     println!("input");
     let day7 = std::fs::read_to_string("inputs/day7.txt").unwrap();
     println!("part 1 = {}", part1(&day7, false));
-    println!("part 1 = {}", part2(&day7, false));
+    println!("part 2 = {}", part2(&day7, false));
 }
 
 #[cfg(test)]
