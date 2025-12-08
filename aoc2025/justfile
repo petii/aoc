@@ -2,31 +2,32 @@
 set windows-shell := ["C:\\Program Files\\Git\\bin\\sh.exe","-c"]
 ext := if os() == "windows" { ".exe" } else { "" }
 
-fmt:
-    clang-format -i *.cpp *.py
-    cargo fmt
+default:
+    @just --list --list-heading=''
 
-day1:
-    uv run day1.py
-
-day2:
-    uv run day2.py
-
-day3:
-    uv run day3.py
-
-day4:
-    uv run day4.py
-
-day5:
-    uv run day5.py
+day1: (_py "day1")
+day2: (_py "day2")
+day3: (_py "day3")
+day4: (_py "day4")
+day5: (_py "day5")
 
 day6:
     clang-format -i day6.cpp
     clang++ day6.cpp -Wall --std=c++23 -o ./bin/day6{{ext}}
     ./bin/day6{{ext}}
 
-day7:
-    cargo fmt -- src/day7.rs
-    cargo test --bin day7
-    cargo run day7 -- inputs/day7.txt
+day7: (_rust "day7")
+day8: (_rust "day8")
+
+
+fmt:
+    clang-format -i *.cpp *.py
+    cargo fmt
+
+_py day:
+    uv run {{day}}.py inputs/{{day}}.txt
+
+_rust day:
+    cargo fmt -- src/{{day}}.rs
+    cargo test --bin={{day}}
+    cargo run --bin={{day}} inputs/{{day}}.txt

@@ -8,5 +8,9 @@ edition = "2024"
 [[bin]]
 name = "day7"
 test = true
-bench = true
 path = "src/day7.rs"
+
+[[bin]]
+name = "day8"
+test = true
+path = "src/day8.rs"
