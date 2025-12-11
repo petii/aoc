@@ -18,6 +18,7 @@ day6:
 
 day7: (_rust "day7")
 day8: (_rust "day8")
+day9: (_rust "day9")
 
 
 fmt:
@@ -25,6 +26,7 @@ fmt:
     cargo fmt
 
 _py day:
+    clang-format -i {{day}}.py
     uv run {{day}}.py inputs/{{day}}.txt
 
 _rust day:
