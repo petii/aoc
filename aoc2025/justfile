@@ -19,7 +19,7 @@ day6:
 day7: (_rust "day7")
 day8: (_rust "day8")
 day9: (_rust "day9")
-
+day10: (_rust "day10")
 
 fmt:
     clang-format -i *.cpp *.py
