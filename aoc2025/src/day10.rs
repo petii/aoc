@@ -160,6 +160,19 @@ impl Machine {
         }
         false
     }
+
+    pub fn still_needed_joltage_sum(&self) -> u32 {
+        (&self.joltage_targets)
+            .into_iter()
+            .zip(&self.joltages)
+            .map(|p| {
+                if p.0 > p.1 {
+                    return p.0 - p.1;
+                }
+                0
+            })
+            .sum()
+    }
 }
 
 fn parse_input(input: &str) -> Vec<Machine> {
@@ -237,6 +250,15 @@ fn joltage_button_presses_multiverse(machine: &Machine) -> u32 {
                 any_powered = true;
             }
             let mut new_states_this_machine = simulate_button_presses_except(&m, None);
+            let min_joltage_distance = (&new_states_this_machine)
+                .into_iter()
+                .map(|r| r.0.still_needed_joltage_sum())
+                .min()
+                .unwrap();
+            new_states_this_machine = new_states_this_machine
+                .into_iter()
+                .filter(|r| r.0.still_needed_joltage_sum() <= min_joltage_distance)
+                .collect();
             next_level_states.append(&mut new_states_this_machine);
             states_explored.insert(m.joltages.clone());
         }
