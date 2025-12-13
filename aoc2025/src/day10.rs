@@ -1,6 +1,7 @@
 // day10.rs
 
-use std::fmt::Display;
+use std::collections::HashSet;
+use std::{fmt::Display, vec};
 
 static EXAMPLE: &str = r#"
 [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
@@ -8,6 +9,7 @@ static EXAMPLE: &str = r#"
 [.###.#] (0,1,2,3,4) (0,3,4) (0,1,2,4,5) (1,2) {10,11,11,5,10,5}
 "#;
 
+#[derive(Clone)]
 struct MachineState(Vec<bool>);
 
 impl MachineState {
@@ -27,6 +29,16 @@ impl MachineState {
 
     pub fn new(states: Vec<bool>) -> Self {
         Self(states)
+    }
+
+    pub fn distance(&self, other: &Self) -> usize {
+        let mut diffs = 0;
+        for (a, b) in (&self.0).into_iter().zip(&other.0) {
+            if *a != *b {
+                diffs += 1;
+            }
+        }
+        diffs
     }
 }
 
@@ -49,6 +61,7 @@ impl core::fmt::Debug for MachineState {
     }
 }
 
+#[derive(Clone)]
 struct Button(Vec<usize>);
 
 impl Button {
@@ -65,13 +78,14 @@ impl Button {
 
 impl Display for Button {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(
+        f.write_str(&format!(
+            "btn({})",
             &(&self.0)
                 .into_iter()
                 .map(|n| n.to_string())
                 .collect::<Vec<_>>()
                 .join(","),
-        )
+        ))
     }
 }
 
@@ -81,7 +95,7 @@ impl core::fmt::Debug for Button {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Machine {
     lights: MachineState,
     on_state: MachineState,
@@ -110,6 +124,24 @@ impl Machine {
                 .collect(),
         }
     }
+
+    pub fn button_press(&self, b: &Button) -> MachineState {
+        let mut state = self.lights.0.clone();
+        for light_index in &b.0 {
+            state[*light_index] = !state[*light_index];
+        }
+        MachineState::new(state)
+    }
+
+    pub fn after_button_press(&self, b: &Button) -> Self {
+        let mut new_machine = self.clone();
+        new_machine.lights = self.button_press(b);
+        new_machine
+    }
+
+    pub fn is_on(&self) -> bool {
+        self.lights.distance(&self.on_state) == 0
+    }
 }
 
 fn parse_input(input: &str) -> Vec<Machine> {
@@ -120,10 +152,64 @@ fn parse_input(input: &str) -> Vec<Machine> {
         .collect()
 }
 
+fn simulate_button_presses_except(m: &Machine, b: Option<&Button>) -> Vec<(Machine, Button, bool)> {
+    (&m.buttons)
+        .into_iter()
+        .filter(|current_b| {
+            if let Some(last_b) = b {
+                return current_b.0 != last_b.0;
+            };
+            true
+        })
+        .map(|b| {
+            let new_state = m.after_button_press(&b);
+            let is_on = new_state.is_on();
+            (new_state, b.clone(), is_on)
+        })
+        .collect::<Vec<_>>()
+}
+
+fn button_presses_multiverse(machine: &Machine) -> usize {
+    let mut level = 0;
+    let mut states_explored = HashSet::new();
+    let mut states_to_explore = simulate_button_presses_except(machine, None);
+    let mut any_on = false;
+    if any_on {
+        return level;
+    }
+    while !any_on && states_to_explore.len() > 0 {
+        level += 1;
+        any_on = (&states_to_explore).into_iter().any(|s| s.2);
+
+        let mut next_level_states = vec![];
+        for (machine, last_button_press, is_on) in states_to_explore {
+            if states_explored.contains(&machine.lights.0) {
+                continue;
+            }
+            if is_on {
+                any_on = true;
+            }
+            let mut new_states_this_machine =
+                simulate_button_presses_except(&machine, Some(&last_button_press));
+            next_level_states.append(&mut new_states_this_machine);
+            states_explored.insert(machine.lights.0);
+        }
+        dbg![&level];
+        states_to_explore = next_level_states;
+    }
+    level
+}
+
 fn part1(input: &str) -> u32 {
     let machines = parse_input(input);
-    dbg!(&machines[0]);
-    machines.len().try_into().unwrap()
+    // dbg!(&machines[0]);
+    let mut acc = 0 as u32;
+    for m in machines {
+        let min_presses = button_presses_multiverse(&m) as u32;
+        acc += min_presses;
+        dbg![m, min_presses];
+    }
+    acc
 }
 
 fn main() {
