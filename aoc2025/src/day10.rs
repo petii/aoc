@@ -101,6 +101,7 @@ struct Machine {
     on_state: MachineState,
     buttons: Vec<Button>,
     joltages: Vec<u32>,
+    joltage_targets: Vec<u32>,
 }
 
 impl Machine {
@@ -110,18 +111,19 @@ impl Machine {
         let lights_str = split_line.next().unwrap();
         let on_state = MachineState::parse(lights_str);
         let buttons_strs = split_line.take(part_count - 2);
-        let joltages_str = line.split(' ').last().unwrap();
-
+        let joltage_targets_str = line.split(' ').last().unwrap();
+        let joltage_targets: Vec<_> = joltage_targets_str
+            .replace("{", "")
+            .replace("}", "")
+            .split(",")
+            .map(|c| str::parse::<u32>(c).unwrap())
+            .collect();
         Self {
             lights: MachineState::all_off(on_state.0.len()),
             on_state,
             buttons: buttons_strs.map(Button::parse).collect(),
-            joltages: joltages_str
-                .replace("{", "")
-                .replace("}", "")
-                .split(",")
-                .map(|c| str::parse::<u32>(c).unwrap())
-                .collect(),
+            joltages: vec![0; joltage_targets.len()],
+            joltage_targets,
         }
     }
 
@@ -136,11 +138,27 @@ impl Machine {
     pub fn after_button_press(&self, b: &Button) -> Self {
         let mut new_machine = self.clone();
         new_machine.lights = self.button_press(b);
+        for index in &b.0 {
+            new_machine.joltages[*index] += 1;
+        }
         new_machine
     }
 
     pub fn is_on(&self) -> bool {
         self.lights.distance(&self.on_state) == 0
+    }
+
+    pub fn is_powered(&self) -> bool {
+        self.joltages == self.joltage_targets
+    }
+
+    pub fn is_overpowered(&self) -> bool {
+        for (a, b) in (&self.joltages).into_iter().zip(&self.joltage_targets) {
+            if *a > *b {
+                return true;
+            }
+        }
+        false
     }
 }
 
@@ -174,9 +192,6 @@ fn button_presses_multiverse(machine: &Machine) -> usize {
     let mut states_explored = HashSet::new();
     let mut states_to_explore = simulate_button_presses_except(machine, None);
     let mut any_on = false;
-    if any_on {
-        return level;
-    }
     while !any_on && states_to_explore.len() > 0 {
         level += 1;
         any_on = (&states_to_explore).into_iter().any(|s| s.2);
@@ -200,14 +215,58 @@ fn button_presses_multiverse(machine: &Machine) -> usize {
     level
 }
 
+fn joltage_button_presses_multiverse(machine: &Machine) -> u32 {
+    let mut level = 0;
+    let mut states_explored = HashSet::new();
+    let mut states_to_explore = simulate_button_presses_except(machine, None);
+    let mut any_powered = false;
+    while !any_powered && states_to_explore.len() > 0 {
+        level += 1;
+        any_powered = (&states_to_explore).into_iter().any(|s| s.0.is_powered());
+
+        let mut next_level_states = vec![];
+        for (m, _b, _io) in states_to_explore {
+            if states_explored.contains(&m.joltages) {
+                continue;
+            }
+            if m.is_overpowered() {
+                continue;
+            }
+            let is_powered = m.is_powered();
+            if is_powered {
+                any_powered = true;
+            }
+            let mut new_states_this_machine = simulate_button_presses_except(&m, None);
+            next_level_states.append(&mut new_states_this_machine);
+            states_explored.insert(m.joltages.clone());
+        }
+        dbg![&level];
+        states_to_explore = next_level_states;
+    }
+    level
+}
+
 fn part1(input: &str) -> u32 {
     let machines = parse_input(input);
     // dbg!(&machines[0]);
     let mut acc = 0 as u32;
     for m in machines {
+        dbg![&m];
         let min_presses = button_presses_multiverse(&m) as u32;
         acc += min_presses;
-        dbg![m, min_presses];
+        dbg![min_presses];
+    }
+    acc
+}
+
+fn part2(input: &str) -> u32 {
+    let machines = parse_input(input);
+    let mut acc = 0;
+    for m in machines {
+        dbg![&m];
+        let min_presses = joltage_button_presses_multiverse(&m);
+        dbg![min_presses];
+        acc += min_presses;
     }
     acc
 }
@@ -215,9 +274,11 @@ fn part1(input: &str) -> u32 {
 fn main() {
     println!("example");
     println!("part1={}", part1(EXAMPLE));
+    println!("part2={}", part2(EXAMPLE));
     println!("input");
     let day10 = std::fs::read_to_string("inputs/day10.txt").unwrap();
     println!("part1={}", part1(&day10));
+    println!("part2={}", part2(&day10));
 }
 
 #[cfg(test)]
@@ -227,5 +288,10 @@ mod tests {
     #[test]
     fn example_part1() {
         assert_eq!(part1(EXAMPLE), 7)
+    }
+
+    #[test]
+    fn example_part2() {
+        assert_eq!(part2(EXAMPLE), 33)
     }
 }
