@@ -1,0 +1,32 @@
+# https://just.systems
+set windows-shell := ["C:\\Program Files\\Git\\bin\\sh.exe","-c"]
+ext := if os() == "windows" { ".exe" } else { "" }
+
+fmt:
+    clang-format -i *.cpp *.py
+    cargo fmt
+
+day1:
+    uv run day1.py
+
+day2:
+    uv run day2.py
+
+day3:
+    uv run day3.py
+
+day4:
+    uv run day4.py
+
+day5:
+    uv run day5.py
+
+day6:
+    clang-format -i day6.cpp
+    clang++ day6.cpp -Wall --std=c++23 -o ./bin/day6{{ext}}
+    ./bin/day6{{ext}}
+
+day7:
+    cargo fmt -- src/day7.rs
+    cargo test --bin day7
+    cargo run day7 -- inputs/day7.txt
